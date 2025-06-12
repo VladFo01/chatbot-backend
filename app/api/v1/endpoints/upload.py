@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException, Depends
 from app.schemas.upload import UploadResponse, ProcessingStatus
 from app.database import get_mongo_db
+from app.services.document_processor import document_processor
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from uuid import uuid4
 import os
@@ -18,9 +19,15 @@ async def save_file(file: UploadFile, file_id: str) -> str:
         f.write(content)
     return file_path
 
-async def process_document(file_id: str, file_path: str, db: AsyncIOMotorDatabase):
-    # Placeholder for async document processing (embeddings, indexing, etc.)
-    await db["uploads"].update_one({"file_id": file_id}, {"$set": {"status": "processed", "processed_at": datetime.utcnow()}}, upsert=True)
+async def process_document(file_id: str, file_path: str, filename: str, db: AsyncIOMotorDatabase):
+    """Process document with FAISS indexing and embeddings"""
+    try:
+        await document_processor.process_document(file_path, file_id, filename, db)
+    except Exception as e:
+        await db["uploads"].update_one(
+            {"file_id": file_id}, 
+            {"$set": {"status": "failed", "error": str(e), "processed_at": datetime.utcnow()}}
+        )
 
 @router.post("/", response_model=UploadResponse)
 async def upload_file(
@@ -37,7 +44,7 @@ async def upload_file(
         "status": "processing",
         "uploaded_at": datetime.utcnow()
     })
-    background_tasks.add_task(process_document, file_id, file_path, db)
+    background_tasks.add_task(process_document, file_id, file_path, file.filename, db)
     return UploadResponse(file_id=file_id, filename=file.filename, status="processing")
 
 @router.get("/status/{file_id}", response_model=ProcessingStatus)
@@ -45,4 +52,25 @@ async def get_processing_status(file_id: str, db: AsyncIOMotorDatabase = Depends
     doc = await db["uploads"].find_one({"file_id": file_id})
     if not doc:
         raise HTTPException(status_code=404, detail="File not found")
-    return ProcessingStatus(file_id=file_id, status=doc.get("status", "unknown"), detail=None) 
+    
+    return ProcessingStatus(
+        file_id=file_id,
+        status=doc.get("status", "unknown"),
+        processing_step=doc.get("processing_step"),
+        chunks_count=doc.get("chunks_count"),
+        text_length=doc.get("text_length"),
+        error=doc.get("error"),
+        uploaded_at=doc.get("uploaded_at"),
+        processed_at=doc.get("processed_at")
+    )
+
+
+
+@router.get("/index/stats")
+async def get_index_stats():
+    """Get statistics about the FAISS index"""
+    try:
+        stats = document_processor.get_index_stats()
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}") 
