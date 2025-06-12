@@ -44,10 +44,13 @@ async def websocket_endpoint(websocket: WebSocket, db: AsyncIOMotorDatabase):
             # Store message in MongoDB
             await db["chats"].update_one(
                 {"user_id": user_id},
-                {"$push": {"messages": message.dict()}},
+                {"$push": {"messages": message.model_dump()}},
                 upsert=True
             )
             # Echo message back (or broadcast, if needed)
-            await websocket.send_json(message.dict())
+            message_dict = message.model_dump()
+            # Convert datetime to ISO string for JSON serialization
+            message_dict["timestamp"] = message_dict["timestamp"].isoformat()
+            await websocket.send_json(message_dict)
     except WebSocketDisconnect:
         active_connections.pop(user_id, None) 

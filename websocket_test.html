@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { margin: 20px 0; }
+        input, button { margin: 5px; padding: 10px; }
+        #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin: 10px 0; }
+        .message { margin: 5px 0; padding: 5px; background: #f0f0f0; border-radius: 3px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test for Chatbot</h1>
+    
+    <div class="container">
+        <h3>Step 1: Login to get token</h3>
+        <input type="email" id="email" placeholder="Email" value="test@example.com">
+        <input type="password" id="password" placeholder="Password" value="testpassword">
+        <button onclick="login()">Login</button>
+    </div>
+    
+    <div class="container">
+        <h3>Step 2: Connect WebSocket</h3>
+        <input type="text" id="token" placeholder="JWT Token (will be filled automatically)" style="width: 400px;">
+        <button onclick="connectWebSocket()">Connect</button>
+        <button onclick="disconnectWebSocket()">Disconnect</button>
+    </div>
+    
+    <div id="status" class="status disconnected">Status: Disconnected</div>
+    
+    <div class="container">
+        <h3>Step 3: Send Messages</h3>
+        <input type="text" id="messageInput" placeholder="Type your message..." style="width: 400px;">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    
+    <div id="messages"></div>
+
+    <script>
+        let websocket = null;
+        let token = null;
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    token = data.access_token;
+                    document.getElementById('token').value = token;
+                    addMessage('✓ Login successful! Token received.');
+                } else {
+                    const error = await response.text();
+                    addMessage('✗ Login failed: ' + error);
+                }
+            } catch (error) {
+                addMessage('✗ Login error: ' + error.message);
+            }
+        }
+
+        function connectWebSocket() {
+            const tokenInput = document.getElementById('token').value;
+            if (!tokenInput) {
+                addMessage('✗ Please login first to get a token');
+                return;
+            }
+
+            try {
+                websocket = new WebSocket(`ws://localhost:8000/ws/chat?token=${tokenInput}`);
+                
+                websocket.onopen = function(event) {
+                    updateStatus(true);
+                    addMessage('✓ WebSocket connected successfully!');
+                };
+                
+                websocket.onmessage = function(event) {
+                    const message = JSON.parse(event.data);
+                    addMessage(`📨 Received: ${message.sender}: ${message.message} (${new Date(message.timestamp).toLocaleTimeString()})`);
+                };
+                
+                websocket.onclose = function(event) {
+                    updateStatus(false);
+                    addMessage(`✗ WebSocket disconnected (Code: ${event.code})`);
+                };
+                
+                websocket.onerror = function(error) {
+                    addMessage('✗ WebSocket error: ' + error);
+                };
+                
+            } catch (error) {
+                addMessage('✗ Connection error: ' + error.message);
+            }
+        }
+
+        function disconnectWebSocket() {
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                addMessage('✗ Please enter a message');
+                return;
+            }
+            
+            if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+                addMessage('✗ WebSocket not connected');
+                return;
+            }
+            
+            try {
+                websocket.send(JSON.stringify({ message: message }));
+                addMessage(`📤 Sent: ${message}`);
+                messageInput.value = '';
+            } catch (error) {
+                addMessage('✗ Send error: ' + error.message);
+            }
+        }
+
+        function addMessage(text) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            if (connected) {
+                statusDiv.textContent = 'Status: Connected';
+                statusDiv.className = 'status connected';
+            } else {
+                statusDiv.textContent = 'Status: Disconnected';
+                statusDiv.className = 'status disconnected';
+            }
+        }
+
+        // Allow Enter key to send messages
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html> 
