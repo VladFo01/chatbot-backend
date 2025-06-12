@@ -8,7 +8,6 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - chatbot_data:/app/data
     env_file:
       - .env
     depends_on:
@@ -24,5 +23,4 @@ services:
       - mongo_data:/data/db
 
 volumes:
-  chatbot_data:
   mongo_data: 
