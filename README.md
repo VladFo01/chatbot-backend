@@ -101,8 +101,3 @@ pytest
 - MongoDB is used for users, chat history, and file metadata
 - WebSocket chat requires JWT token (get from login/register)
 - Document processing is async (background task placeholder)
-- Update CORS and secrets for production
-
-## License
-
-MIT 
