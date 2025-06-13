@@ -3,6 +3,9 @@ import asyncio
 from typing import List, Dict, Any
 from pathlib import Path
 import logging
+import rdflib
+import json
+import xml.etree.ElementTree as ET
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -96,6 +99,16 @@ class DocumentProcessor:
             elif file_path.suffix.lower() == '.txt':
                 with open(file_path, 'r', encoding='utf-8') as f:
                     text = f.read()
+            elif file_path.suffix.lower() in ['.rdf', '.nt', '.owl', '.xml']:
+                # Try RDF extraction first, fallback to generic XML if it fails
+                try:
+                    text = self._extract_from_rdf(file_path)
+                    if not text.strip():
+                        raise ValueError('No RDF triples extracted')
+                except Exception:
+                    text = self._extract_from_xml(file_path)
+            elif file_path.suffix.lower() == '.json':
+                text = self._extract_from_json(file_path)
             else:
                 logger.warning(f"Unsupported file format: {file_path.suffix}")
                 return ""
@@ -128,6 +141,89 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f"Error reading DOCX {file_path}: {e}")
         return text
+
+    def _extract_from_rdf(self, file_path: Path) -> str:
+        """Extract readable text from RDF file using rdflib with rdfs:label support"""
+        RDFS_LABEL = rdflib.term.URIRef('http://www.w3.org/2000/01/rdf-schema#label')
+    
+        def get_label(term, g):
+            # Якщо це URI — шукаємо rdfs:label, інакше повертаємо простий label
+            if isinstance(term, rdflib.term.URIRef) or isinstance(term, rdflib.term.BNode):
+                # Спробуємо знайти rdfs:label для term
+                label = None
+                for _, _, lbl in g.triples((term, RDFS_LABEL, None)):
+                    label = str(lbl)
+                    break
+                if label:
+                    return label
+                else:
+                    # fallback — остання частина URI
+                    return str(term).split('/')[-1].split('#')[-1]
+            elif isinstance(term, rdflib.term.Literal):
+                return str(term)
+            else:
+                return str(term)
+
+        try:
+            g = rdflib.Graph()
+            g.parse(str(file_path))
+            lines = []
+            for subj, pred, obj in g:
+                subj_label = get_label(subj, g)
+                pred_label = get_label(pred, g)
+                obj_label = get_label(obj, g)
+                sentence = f"{subj_label} {pred_label} {obj_label}."
+                lines.append(sentence)
+            text = "\n".join(lines)
+        except Exception as e:
+            logger.error(f"Error reading RDF {file_path}: {e}")
+            text = ""
+        return text
+
+    def _extract_from_xml(self, file_path: Path) -> str:
+        """Extract all text content from a generic XML file by flattening the tree."""
+        try:
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+            texts = []
+            def recurse(node):
+                if node.text and node.text.strip():
+                    texts.append(node.text.strip())
+                for child in node:
+                    recurse(child)
+            recurse(root)
+            return '\n'.join(texts)
+        except Exception as e:
+            logger.error(f"Error reading XML {file_path}: {e}")
+            return ""
+
+    def _extract_from_json(self, file_path: Path) -> str:
+        """Extract text from JSON file by flattening all key-value paths"""
+        def flatten_json(y, prefix=""):
+            out = []
+            def flatten(x, name=""):
+                if isinstance(x, dict):
+                    for k, v in x.items():
+                        new_name = f"{name}/{k}" if name else k
+                        flatten(v, new_name)
+                elif isinstance(x, list):
+                    for i, v in enumerate(x):
+                        new_name = f"{name}[{i}]" if name else str(i)
+                        flatten(v, new_name)
+                elif isinstance(x, str):
+                    out.append(f"{name}: {x}")
+            flatten(y, prefix)
+            return out
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            strings = flatten_json(data)
+            return '\n'.join(strings)
+        except Exception as e:
+            logger.error(f"Error reading JSON {file_path}: {e}")
+            return ""
+
 
     async def process_document(self, file_path: str, file_id: str, filename: str, db: AsyncIOMotorDatabase):
         """Process a document: extract text, split, embed, and index"""
@@ -273,6 +369,13 @@ class DocumentProcessor:
             "index_dimension": self.index.d,
             "index_type": type(self.index).__name__
         }
+
+    def clear_index(self):
+        """Clear all embeddings and documents from the FAISS index and memory."""
+        self.index = faiss.IndexFlatL2(1536)  # Reset to empty index
+        self.documents = []
+        self._save_index()
+        logger.info("FAISS index and document list cleared.")
 
 # Global instance
 document_processor = DocumentProcessor() 
