@@ -23,19 +23,20 @@ class LLMService:
                 max_tokens=1000
             )
         
-        self.system_prompt = """You are a helpful AI assistant that answers questions based on the provided context from uploaded documents. 
+        self.system_prompt = """You are a helpful AI assistant. Answer questions directly and naturally without referencing sources or context.
 
-IMPORTANT GUIDELINES:
-1. Always use the provided context to answer questions when relevant
-2. If the context doesn't contain enough information, say so clearly
-3. Cite the source filename when referencing information from documents
-4. Be concise but comprehensive
-5. If no relevant context is provided, answer based on your general knowledge but mention this
+CRITICAL INSTRUCTIONS:
+- NEVER start responses with "Based on the provided context" or similar phrases
+- NEVER mention "sources", "documents", or "context" in your response
+- NEVER include filenames or document references
+- Answer questions directly as if the information is your own knowledge
+- Be helpful, concise, and informative
+- If you don't know something, just say "I don't have information about that"
 
 Context from documents:
 {context}
 
-Please answer the user's question based on this context."""
+Answer the user's question naturally without mentioning this context."""
 
     async def generate_response(
         self, 
@@ -55,6 +56,8 @@ Please answer the user's question based on this context."""
                 
                 if search_results:
                     context_parts = []
+                    logger.info(f"Found {len(search_results)} relevant documents for query: '{message[:100]}...'")
+                    
                     for i, result in enumerate(search_results):
                         context_parts.append(
                             f"Source {i+1} (from {result['metadata']['filename']}):\n{result['content']}\n"
@@ -65,7 +68,18 @@ Please answer the user's question based on this context."""
                             "similarity_score": result['similarity_score'],
                             "content_preview": result['content'][:200] + "..." if len(result['content']) > 200 else result['content']
                         })
+                        
+                        # Log each source with similarity score and content preview
+                        logger.info(f"  Source {i+1}: {result['metadata']['filename']} "
+                                   f"(similarity: {result['similarity_score']:.3f}) - "
+                                   f"Content preview: {result['content'][:150]}...")
+                    
                     context = "\n".join(context_parts)
+                    logger.info(f"Total context length: {len(context)} characters")
+                else:
+                    logger.info(f"No relevant documents found for query: '{message[:100]}...'")
+            else:
+                logger.info(f"RAG disabled for query: '{message[:100]}...')")
                 
             # Prepare messages for the LLM
             messages = []
@@ -73,6 +87,13 @@ Please answer the user's question based on this context."""
             # Add system message with context
             system_content = self.system_prompt.format(context=context if context else "No relevant context found.")
             messages.append(SystemMessage(content=system_content))
+            
+            # Log the context being sent to LLM
+            if context:
+                logger.info(f"Sending context to LLM (length: {len(context)} chars):")
+                logger.debug(f"Context content:\n{context[:500]}...")
+            else:
+                logger.info("No context sent to LLM - using general knowledge")
             
             # Add chat history if provided
             if chat_history:
@@ -88,10 +109,16 @@ Please answer the user's question based on this context."""
             # Generate response
             response = await self._generate_async(messages)
             
+            # Log the response details
+            context_used = bool(context)
+            logger.info(f"LLM Response generated - Context used: {context_used}, "
+                       f"Sources: {len(sources)}, Response length: {len(response.content)} chars")
+            logger.debug(f"LLM Response content: {response.content[:200]}...")
+            
             return {
                 "response": response.content,
                 "sources": sources,
-                "context_used": bool(context),
+                "context_used": context_used,
                 "model": "gpt-3.5-turbo"
             }
             

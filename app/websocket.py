@@ -155,11 +155,17 @@ async def websocket_endpoint(websocket: WebSocket, db: AsyncIOMotorDatabase):
                 
                 # Add context indicator and sources if available
                 if should_use_rag and llm_response.get("context_used"):
-                    print(llm_response["sources"])
                     if llm_response.get("sources"):
+                        # Deduplicate sources by filename
+                        unique_sources = {}
+                        for source in llm_response["sources"]:
+                            filename = source['filename']
+                            if filename not in unique_sources:
+                                unique_sources[filename] = source
+                        
                         ai_response_content += "\n\n📚 **Sources:**\n"
-                        for i, source in enumerate(llm_response["sources"][:3], 1):
-                            ai_response_content += f"{i}. {source['filename']}\n"
+                        for i, (filename, source) in enumerate(unique_sources.items(), 1):
+                            ai_response_content += f"{i}. {filename}\n"
                     else:
                         ai_response_content += "\n\n💡 *I searched your documents but didn't find specific relevant information for this question.*"
                 elif should_use_rag and not llm_response.get("context_used"):
