@@ -1,0 +1,38 @@
+Pizza is a type of food that usually consists of a pizza base, tomato, cheese, and various toppings.
+
+The Margherita pizza is a classic pizza. It has a pizza base, tomato topping, and cheese topping.
+
+VegetarianPizza is a type of pizza that contains no meat toppings. VegetarianPizza can include toppings such as CheeseTopping, MushroomTopping, and TomatoTopping.
+
+The QuattroFormaggi is another pizza type. It includes four different cheese toppings: MozzarellaTopping, GorgonzolaTopping, ParmesanTopping, and FontinaTopping.
+
+The Americana pizza is a meat pizza. It contains MozzarellaTopping, TomatoTopping, and PepperoniTopping.
+
+The Soho pizza is a vegetarian pizza. It is made with an OliveTopping, GarlicTopping, and MozzarellaTopping.
+
+A pizza base is essential for every pizza. PizzaBase is a type of food.
+
+Common pizza toppings include:
+- CheeseTopping: A topping made from cheese, used on many pizzas.
+- TomatoTopping: Sliced or pureed tomato, used on Margherita and other pizzas.
+- MeatTopping: Includes PepperoniTopping, HamTopping, ChickenTopping, and AnchovyTopping.
+- VegetableTopping: Includes MushroomTopping, PepperTopping, OnionTopping, and OliveTopping.
+- SeafoodTopping: Includes TunaTopping, PrawnTopping, and AnchovyTopping.
+
+CheeseTopping and TomatoTopping are types of pizza toppings. MozzarellaTopping is a kind of CheeseTopping.
+
+Margherita pizza has the following toppings: CheeseTopping and TomatoTopping.
+
+QuattroFormaggi pizza includes: MozzarellaTopping, GorgonzolaTopping, ParmesanTopping, FontinaTopping.
+
+American pizza includes: PepperoniTopping and MozzarellaTopping.
+
+VegetarianPizza can have MushroomTopping and OliveTopping but never has MeatTopping.
+
+Pizza can be classified as either VegetarianPizza or NonVegetarianPizza, depending on its toppings.
+
+Some pizzas, like the Soho, are suitable for vegetarians because they do not contain meat or seafood.
+
+Pizza toppings are grouped as CheeseTopping, MeatTopping, VegetableTopping, and SeafoodTopping.
+
+All pizzas have a PizzaBase and at least one topping.

@@ -1,0 +1,102 @@
+{
+  "pizzas": [
+    {
+      "name": "Margherita",
+      "type": "Pizza",
+      "base": "PizzaBase",
+      "toppings": ["CheeseTopping", "TomatoTopping"],
+      "description": "A classic pizza with a pizza base, tomato topping, and cheese topping."
+    },
+    {
+      "name": "VegetarianPizza",
+      "type": "Pizza",
+      "base": "PizzaBase",
+      "toppings": [
+        "CheeseTopping",
+        "MushroomTopping",
+        "TomatoTopping",
+        "OliveTopping"
+      ],
+      "prohibitedToppings": ["MeatTopping", "SeafoodTopping"],
+      "description": "A vegetarian pizza that does not contain any meat or seafood toppings."
+    },
+    {
+      "name": "QuattroFormaggi",
+      "type": "Pizza",
+      "base": "PizzaBase",
+      "toppings": [
+        "MozzarellaTopping",
+        "GorgonzolaTopping",
+        "ParmesanTopping",
+        "FontinaTopping"
+      ],
+      "description": "A four-cheese pizza including mozzarella, gorgonzola, parmesan, and fontina toppings."
+    },
+    {
+      "name": "Americana",
+      "type": "Pizza",
+      "base": "PizzaBase",
+      "toppings": ["MozzarellaTopping", "TomatoTopping", "PepperoniTopping"],
+      "description": "A meat pizza with mozzarella, tomato, and pepperoni toppings."
+    },
+    {
+      "name": "Soho",
+      "type": "Pizza",
+      "base": "PizzaBase",
+      "toppings": ["OliveTopping", "GarlicTopping", "MozzarellaTopping"],
+      "description": "A vegetarian pizza with olive, garlic, and mozzarella toppings."
+    }
+  ],
+  "toppings": [
+    {
+      "name": "CheeseTopping",
+      "type": "Topping",
+      "subtypes": ["MozzarellaTopping", "ParmesanTopping", "GorgonzolaTopping", "FontinaTopping"],
+      "description": "A topping made from cheese, commonly used on pizzas."
+    },
+    {
+      "name": "TomatoTopping",
+      "type": "Topping",
+      "description": "A topping made from tomatoes, essential for many pizzas."
+    },
+    {
+      "name": "MeatTopping",
+      "type": "Topping",
+      "subtypes": ["PepperoniTopping", "HamTopping", "ChickenTopping", "AnchovyTopping"],
+      "description": "Toppings made from various types of meat."
+    },
+    {
+      "name": "VegetableTopping",
+      "type": "Topping",
+      "subtypes": ["MushroomTopping", "PepperTopping", "OnionTopping", "OliveTopping", "GarlicTopping"],
+      "description": "Toppings made from different vegetables."
+    },
+    {
+      "name": "SeafoodTopping",
+      "type": "Topping",
+      "subtypes": ["TunaTopping", "PrawnTopping", "AnchovyTopping"],
+      "description": "Toppings made from seafood."
+    }
+  ],
+  "bases": [
+    {
+      "name": "PizzaBase",
+      "type": "Food",
+      "description": "The essential foundation for every pizza."
+    }
+  ],
+  "rules": [
+    "Every pizza has a PizzaBase and at least one topping.",
+    "VegetarianPizza must not have any MeatTopping or SeafoodTopping.",
+    "Pizzas can be classified as vegetarian or non-vegetarian depending on their toppings.",
+    "All cheese toppings are a type of CheeseTopping.",
+    "MozzarellaTopping is a kind of CheeseTopping."
+  ],
+  "ingredientTypes": [
+    "Cheese",
+    "Tomato",
+    "Vegetable",
+    "Meat",
+    "Seafood"
+  ]
+}

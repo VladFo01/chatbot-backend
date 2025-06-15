@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns:ex="http://example.org/kbchatbot#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <ex:KnowledgeBaseChatbot rdf:about="http://example.org/kbchatbot#ChatbotSystem">
+    <ex:uses rdf:resource="http://example.org/kbchatbot#FastAPI"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#MongoDB"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#LangChain"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#OpenAI"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#FAISS"/>
+    <ex:hasFeature rdf:resource="http://example.org/kbchatbot#DocumentUpload"/>
+    <ex:hasFeature rdf:resource="http://example.org/kbchatbot#RealTimeChat"/>
+    <ex:hasFeature rdf:resource="http://example.org/kbchatbot#VectorSearch"/>
+    <ex:hasFeature rdf:resource="http://example.org/kbchatbot#Security"/>
+    <ex:hasFeature rdf:resource="http://example.org/kbchatbot#Deployment"/>
+    <ex:architecture rdf:resource="http://example.org/kbchatbot#Microservices"/>
+  </ex:KnowledgeBaseChatbot>
+
+  <ex:Feature rdf:about="http://example.org/kbchatbot#DocumentUpload">
+    <ex:supportsFormat rdf:resource="http://example.org/kbchatbot#PDF"/>
+    <ex:supportsFormat rdf:resource="http://example.org/kbchatbot#DOCX"/>
+    <ex:supportsFormat rdf:resource="http://example.org/kbchatbot#TXT"/>
+    <ex:hasProcess rdf:resource="http://example.org/kbchatbot#TextExtraction"/>
+    <ex:hasProcess rdf:resource="http://example.org/kbchatbot#Chunking"/>
+    <ex:hasProcess rdf:resource="http://example.org/kbchatbot#EmbeddingGeneration"/>
+    <ex:hasProcess rdf:resource="http://example.org/kbchatbot#FAISSIndexing"/>
+    <ex:hasProcess rdf:resource="http://example.org/kbchatbot#MetadataStorage"/>
+  </ex:Feature>
+
+  <ex:Feature rdf:about="http://example.org/kbchatbot#RealTimeChat">
+    <ex:uses rdf:resource="http://example.org/kbchatbot#WebSocket"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#JWT"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#MongoDB"/>
+  </ex:Feature>
+
+  <ex:Feature rdf:about="http://example.org/kbchatbot#VectorSearch">
+    <ex:uses rdf:resource="http://example.org/kbchatbot#FAISS"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#OpenAI"/>
+  </ex:Feature>
+
+  <ex:Feature rdf:about="http://example.org/kbchatbot#Security">
+    <ex:uses rdf:resource="http://example.org/kbchatbot#JWT"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#InputValidation"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#CORS"/>
+  </ex:Feature>
+
+  <ex:Feature rdf:about="http://example.org/kbchatbot#Deployment">
+    <ex:uses rdf:resource="http://example.org/kbchatbot#Docker"/>
+    <ex:uses rdf:resource="http://example.org/kbchatbot#VolumeMounting"/>
+  </ex:Feature>
+
+  <!-- Processes -->
+  <ex:Process rdf:about="http://example.org/kbchatbot#TextExtraction"/>
+  <ex:Process rdf:about="http://example.org/kbchatbot#Chunking"/>
+  <ex:Process rdf:about="http://example.org/kbchatbot#EmbeddingGeneration"/>
+  <ex:Process rdf:about="http://example.org/kbchatbot#FAISSIndexing"/>
+  <ex:Process rdf:about="http://example.org/kbchatbot#MetadataStorage"/>
+
+  <!-- Technologies -->
+  <ex:Technology rdf:about="http://example.org/kbchatbot#FastAPI"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#MongoDB"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#FAISS"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#LangChain"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#OpenAI"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#Docker"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#WebSocket"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#JWT"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#InputValidation"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#CORS"/>
+  <ex:Technology rdf:about="http://example.org/kbchatbot#VolumeMounting"/>
+
+  <!-- Formats -->
+  <ex:Format rdf:about="http://example.org/kbchatbot#PDF"/>
+  <ex:Format rdf:about="http://example.org/kbchatbot#DOCX"/>
+  <ex:Format rdf:about="http://example.org/kbchatbot#TXT"/>
+
+  <!-- Architecture -->
+  <ex:Architecture rdf:about="http://example.org/kbchatbot#Microservices"/>
+</rdf:RDF>

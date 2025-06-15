@@ -1,0 +1,59 @@
+{
+  "system": {
+    "name": "Knowledge Base Chatbot",
+    "overview": "A comprehensive knowledge base chatbot system built with FastAPI, MongoDB, and LangChain. Provides intelligent document processing and retrieval using FAISS vector database for semantic search."
+  },
+  "features": {
+    "document_upload_and_processing": {
+      "supported_formats": ["PDF", "DOCX", "TXT"],
+      "processes": [
+        "Automatic text extraction and chunking",
+        "Embedding generation using OpenAI API",
+        "FAISS indexing for fast similarity search"
+      ]
+    },
+    "real_time_chat_interface": {
+      "technologies": ["WebSocket", "JWT authentication", "MongoDB"],
+      "capabilities": [
+        "WebSocket-based communication",
+        "Chat history persistence in MongoDB",
+        "Support for both normal chat and RAG"
+      ]
+    },
+    "vector_search_capabilities": {
+      "technologies": ["FAISS", "OpenAI"],
+      "capabilities": [
+        "Semantic search across uploaded documents",
+        "Configurable similarity thresholds",
+        "Source attribution and relevance scoring"
+      ]
+    }
+  },
+  "architecture_components": [
+    "FastAPI backend with async support",
+    "MongoDB for user data and chat history",
+    "FAISS for vector similarity search",
+    "LangChain for document processing and LLM integration",
+    "OpenAI GPT models for natural language generation"
+  ],
+  "technical_implementation": [
+    "Text Extraction: Content is extracted from various file formats",
+    "Text Chunking: Large documents are split into manageable chunks using RecursiveCharacterTextSplitter",
+    "Embedding Generation: Each chunk is converted to vector embeddings using OpenAI's text-embedding-ada-002 model",
+    "FAISS Indexing: Embeddings are stored in a FAISS index for efficient similarity search",
+    "Metadata Storage: Document metadata and chunk information is stored for retrieval"
+  ],
+  "security_features": [
+    "JWT-based authentication for API endpoints",
+    "Token-based WebSocket authentication",
+    "Input validation and sanitization",
+    "CORS configuration for frontend integration"
+  ],
+  "deployment": {
+    "technologies": ["Docker", "MongoDB"],
+    "features": [
+      "Application containerized with Docker",
+      "Volume mounting for data persistence"
+    ]
+  }
+}
